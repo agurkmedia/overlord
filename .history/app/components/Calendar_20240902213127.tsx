@@ -10,10 +10,10 @@ export default function Calendar() {
   const [noteContent, setNoteContent] = useState<string>('');
   const [noteTime, setNoteTime] = useState<string>('');
   const [editNoteId, setEditNoteId] = useState<string | null>(null);
-  const [isAscending, setIsAscending] = useState<boolean>(true);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [modalTop, setModalTop] = useState<number>(0);
-  const [displayAll, setDisplayAll] = useState<boolean>(true);
+  const [isAscending, setIsAscending] = useState<boolean>(true); // New state for sort order
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // New state for modal visibility
+  const [modalTop, setModalTop] = useState<number>(0); // New state for modal top position
+  const [displayAll, setDisplayAll] = useState<boolean>(true); // New state for display mode
   const [viewMode, setViewMode] = useState<'all' | 'today' | 'daily'>('all');
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [deleteNoteId, setDeleteNoteId] = useState<string | null>(null);
@@ -27,7 +27,7 @@ export default function Calendar() {
   useEffect(() => {
     const handleScroll = () => {
       if (isModalOpen) {
-        setModalTop(window.scrollY + 50);
+        setModalTop(window.scrollY + 50); // Adjust the modal top position
       }
     };
     window.addEventListener('scroll', handleScroll);
@@ -42,6 +42,7 @@ export default function Calendar() {
       const notes = await response.json();
       setNotes(notes);
     } else if (response.status === 401) {
+      // Handle unauthorized access (e.g., redirect to login)
       console.error('Unauthorized access');
     } else {
       console.error('Failed to fetch notes');
@@ -100,17 +101,17 @@ export default function Calendar() {
     setSelectedDate(new Date(note.date));
     setNoteTime(note.time);
     setNoteContent(note.content);
-    setModalTop(window.scrollY + 50);
-    setIsModalOpen(true);
+    setModalTop(window.scrollY + 50); // Adjust the modal top position
+    setIsModalOpen(true); // Open the modal for editing
   }
 
   function openAddNoteModal() {
     setEditNoteId(null);
     setNoteContent('');
     setNoteTime('');
-    setSelectedDate(new Date());
-    setModalTop(window.scrollY + 50);
-    setIsModalOpen(true);
+    setSelectedDate(new Date()); // Reset the selected date to today
+    setModalTop(window.scrollY + 50); // Adjust the modal top position
+    setIsModalOpen(true); // Open the modal for adding a new note
   }
 
   function groupNotesByDate(notes: any[]) {
@@ -157,9 +158,9 @@ export default function Calendar() {
     onSwipedRight: () => changeDate(-1),
     preventDefaultTouchmoveEvent: true,
     trackMouse: true,
-    delta: 50,
-    swipeDuration: 500,
-    touchEventOptions: { passive: false },
+    delta: 50, // Minimum swipe distance (in pixels) to trigger the event
+    swipeDuration: 500, // Maximum time (in ms) to swipe
+    touchEventOptions: { passive: false }, // Prevent default touch behavior
   });
 
   function changeDate(days: number) {
@@ -192,7 +193,7 @@ export default function Calendar() {
 
   function openDeleteConfirmation(id: string) {
     setDeleteNoteId(id);
-    setDeleteModalTop(window.scrollY + 50);
+    setDeleteModalTop(window.scrollY + 50); // Set the modal top position
     setIsDeleteModalOpen(true);
   }
 
@@ -369,4 +370,254 @@ export default function Calendar() {
       )}
     </div>
   );
+
+'use client';
+
+import { useState, useEffect } from 'react';
+
+export default function Calendar() {
+  const [notes, setNotes] = useState<any[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [noteContent, setNoteContent] = useState<string>('');
+  const [noteTime, setNoteTime] = useState<string>('');
+  const [editNoteId, setEditNoteId] = useState<string | null>(null);
+  const [isAscending, setIsAscending] = useState<boolean>(true); // New state for sort order
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // New state for modal visibility
+  const [modalTop, setModalTop] = useState<number>(0); // New state for modal top position
+  const [displayAll, setDisplayAll] = useState<boolean>(true); // New state for display mode
+
+  useEffect(() => {
+    fetchNotes();
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isModalOpen) {
+        setModalTop(window.scrollY + 50); // Adjust the modal top position
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [isModalOpen]);
+
+  async function fetchNotes() {
+    const response = await fetch('/api/calendarNotes');
+    const notes = await response.json();
+    setNotes(notes);
+  }
+
+  async function fetchTodayNotes() {
+    const today = new Date().toISOString().split('T')[0];
+    console.log(`Henter notater for i dag: ${today}`);
+    const response = await fetch(`/api/calendarNotes?startDate=${today}&endDate=${today}`);
+    const notes = await response.json();
+    console.log('Notater for i dag:', notes);
+    setNotes(notes);
+  }
+
+  async function addOrUpdateNote(e: React.FormEvent) {
+    e.preventDefault();
+    if (editNoteId) {
+      await fetch('/api/calendarNotes', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: editNoteId, date: selectedDate, time: noteTime, content: noteContent }),
+      });
+      setEditNoteId(null);
+    } else {
+      await fetch('/api/calendarNotes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ date: selectedDate, time: noteTime, content: noteContent }),
+      });
+    }
+    setNoteContent('');
+    setNoteTime('');
+    setSelectedDate(new Date()); // Reset the selected date to today
+    fetchNotes();
+    setIsModalOpen(false); // Close the modal after adding/updating a note
+  }
+
+  async function toggleNoteCompletion(id: string, completed: boolean) {
+    await fetch('/api/calendarNotes', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id, completed }),
+    });
+    fetchNotes();
+  }
+
+  function editNote(note: any) {
+    setEditNoteId(note.id);
+    setSelectedDate(new Date(note.date));
+    setNoteTime(note.time);
+    setNoteContent(note.content);
+    setModalTop(window.scrollY + 50); // Adjust the modal top position
+    setIsModalOpen(true); // Open the modal for editing
+  }
+
+  function openAddNoteModal() {
+    setEditNoteId(null);
+    setNoteContent('');
+    setNoteTime('');
+    setSelectedDate(new Date()); // Reset the selected date to today
+    setModalTop(window.scrollY + 50); // Adjust the modal top position
+    setIsModalOpen(true); // Open the modal for adding a new note
+  }
+
+  function groupNotesByDate(notes: any[]) {
+    return notes.reduce((groups: { [key: string]: any[] }, note: any) => {
+      const date = note.date.split('T')[0];
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(note);
+      return groups;
+    }, {});
+  }
+
+  function getDayName(dateString: string) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('no-NO', { weekday: 'long' });
+  }
+
+  const groupedNotes = groupNotesByDate(notes);
+
+  function toggleSortOrder() {
+    setIsAscending(!isAscending);
+  }
+
+  function handleDisplayToday() {
+    setDisplayAll(false);
+    fetchTodayNotes();
+  }
+
+  function handleDisplayAll() {
+    setDisplayAll(true);
+    fetchNotes();
+  }
+
+  return (
+    <div className="h-full flex flex-col">
+      <h2 className="text-2xl font-bold text-white mb-4">Kalender Notater</h2>
+      <div className="flex space-x-2 mb-4">
+        <button
+          onClick={handleDisplayToday}
+          className={`px-4 py-2 rounded-full ${!displayAll ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-700'} hover:bg-blue-700 transition-colors`}
+        >
+          Vis i dag
+        </button>
+        <button
+          onClick={handleDisplayAll}
+          className={`px-4 py-2 rounded-full ${displayAll ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-700'} hover:bg-blue-700 transition-colors`}
+        >
+          Vis alle
+        </button>
+      </div>
+      <div className="sm:hidden mb-4">
+        <button
+          onClick={openAddNoteModal}
+          className="w-full px-6 py-2 rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors"
+        >
+          Legg til nytt notat
+        </button>
+      </div>
+      <form onSubmit={addOrUpdateNote} className="hidden sm:flex space-x-2 mb-4">
+        <input
+          type="time"
+          value={noteTime}
+          onChange={(e) => setNoteTime(e.target.value)}
+          className="px-4 py-2 rounded-full bg-white/50 focus:outline-none focus:ring-2 focus:ring-purple-400"
+        />
+        <input
+          type="text"
+          value={noteContent}
+          onChange={(e) => setNoteContent(e.target.value)}
+          className="flex-grow px-4 py-2 rounded-full bg-white/50 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          placeholder="Legg til nytt notat..."
+        />
+        <button type="submit" className="px-6 py-2 rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors">
+          {editNoteId ? 'Oppdater notat' : 'Legg til notat'}
+        </button>
+      </form>
+      <button onClick={toggleSortOrder} className="px-4 py-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors mb-4">
+        {isAscending ? 'Sorter synkende' : 'Sorter stigende'}
+      </button>
+      <div className="overflow-y-auto flex-grow sm:max-h-[48rem] sm:overflow-y-auto"> {/* Adjusted height */}
+        {Object.keys(groupedNotes)
+          .sort((a, b) => (isAscending ? a.localeCompare(b) : b.localeCompare(a)))
+          .map((date) => (
+            <div key={date} className="border border-gray-300 rounded-lg p-4 bg-white/50 mb-4">
+              <h3 className="text-lg font-semibold mb-2">{date} {getDayName(date)}</h3>
+              <ul className="space-y-2">
+                {groupedNotes[date]
+                  .sort((a: any, b: any) => a.time.localeCompare(b.time))
+                  .map((note: any) => (
+                    <li
+                      key={note.id}
+                      className={`flex items-center space-x-2 p-3 rounded-lg transition-colors ${
+                        note.completed ? 'bg-green-400/50' : 'bg-white/50'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={note.completed}
+                        onChange={() => toggleNoteCompletion(note.id, !note.completed)}
+                        className="form-checkbox h-5 w-5 text-purple-600"
+                      />
+                      <span className={note.completed ? 'line-through' : ''}>{note.time} - {note.content}</span>
+                      <button onClick={() => editNote(note)} className="text-blue-500 hover:underline">Rediger</button>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          ))}
+      </div>
+      {isModalOpen && (
+        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-start justify-center p-4" style={{ top: modalTop }}>
+          <div className="bg-white rounded-lg p-6 w-full max-w-md relative">
+            <h3 className="text-xl font-bold mb-4">{editNoteId ? 'Rediger notat' : 'Legg til nytt notat'}</h3>
+            <form onSubmit={addOrUpdateNote} className="space-y-4">
+              <input
+                type="date"
+                value={selectedDate.toISOString().split('T')[0]}
+                onChange={(e) => setSelectedDate(new Date(e.target.value))}
+                className="w-full px-4 py-2 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              />
+              <input
+                type="time"
+                value={noteTime}
+                onChange={(e) => setNoteTime(e.target.value)}
+                className="w-full px-4 py-2 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              />
+              <input
+                type="text"
+                value={noteContent}
+                onChange={(e) => setNoteContent(e.target.value)}
+                className="w-full px-4 py-2 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                placeholder="Notat innhold"
+              />
+              <div className="flex space-x-2">
+                <button type="submit" className="flex-1 px-6 py-2 rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors">
+                  {editNoteId ? 'Oppdater' : 'Legg til'}
+                </button>
+                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-6 py-2 rounded-full bg-gray-300 text-gray-700 hover:bg-gray-400 transition-colors">
+                  Avbryt
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
 }

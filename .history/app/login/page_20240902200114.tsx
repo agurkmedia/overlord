@@ -27,26 +27,26 @@ export default function Login() {
   return (
     <div className="flex items-center justify-center min-h-screen">
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-4">Logg inn</h1>
+        <h1 className="text-2xl font-bold mb-4">Login</h1>
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="E-post"
+          placeholder="Email"
           className="w-full p-2 mb-4 border rounded"
         />
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Passord"
+          placeholder="Password"
           className="w-full p-2 mb-4 border rounded"
         />
         <button type="submit" className="w-full p-2 bg-blue-500 text-white rounded">
-          Logg inn
+          Login
         </button>
         <p className="mt-4 text-center">
-          Har du ikke en konto? <Link href="/register" className="text-blue-500 hover:underline">Registrer deg her</Link>
+          Don't have an account? <Link href="/register" className="text-blue-500 hover:underline">Register here</Link>
         </p>
       </form>
     </div>

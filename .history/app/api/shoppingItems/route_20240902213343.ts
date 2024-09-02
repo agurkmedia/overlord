@@ -98,4 +98,38 @@ export async function DELETE(request: Request) {
     console.error('Error in DELETE:', error);
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+export async function GET() {
+  const shoppingItems = await prisma.shoppingItem.findMany();
+  return NextResponse.json(shoppingItems);
+}
+
+export async function POST(request: Request) {
+  const { name, quantity } = await request.json();
+  const newItem = await prisma.shoppingItem.create({
+    data: { name, quantity },
+  });
+  return NextResponse.json(newItem);
+}
+
+export async function PATCH(request: Request) {
+  const { id, name, quantity } = await request.json();
+  const updatedItem = await prisma.shoppingItem.update({
+    where: { id },
+    data: { name, quantity },
+  });
+  return NextResponse.json(updatedItem);
+}
+
+export async function DELETE(request: Request) {
+  const { id } = await request.json();
+  await prisma.shoppingItem.delete({
+    where: { id },
+  });
+  return NextResponse.json({ id });
+
 }

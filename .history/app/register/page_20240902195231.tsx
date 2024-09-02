@@ -1,53 +1,56 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 
-export default function Login() {
+export default function Register() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await signIn('credentials', {
-      redirect: false,
-      email,
-      password,
+    const response = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password }),
     });
-    if (result?.error) {
-      console.error(result.error);
+    if (response.ok) {
+      router.push('/login');
     } else {
-      router.push('/');
+      console.error('Registration failed');
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen">
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-4">Logg inn</h1>
+        <h1 className="text-2xl font-bold mb-4">Register</h1>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Name"
+          className="w-full p-2 mb-4 border rounded"
+        />
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="E-post"
+          placeholder="Email"
           className="w-full p-2 mb-4 border rounded"
         />
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Passord"
+          placeholder="Password"
           className="w-full p-2 mb-4 border rounded"
         />
-        <button type="submit" className="w-full p-2 bg-blue-500 text-white rounded">
-          Logg inn
+        <button type="submit" className="w-full p-2 bg-green-500 text-white rounded">
+          Register
         </button>
-        <p className="mt-4 text-center">
-          Har du ikke en konto? <Link href="/register" className="text-blue-500 hover:underline">Registrer deg her</Link>
-        </p>
       </form>
     </div>
   );

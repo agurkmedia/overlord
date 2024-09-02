@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 generator client {
   provider = "prisma-client-js"
 }
@@ -35,4 +36,30 @@ model CalendarNote {
   createdAt DateTime @default(now())
   userId    Int
   user      User     @relation(fields: [userId], references: [id])
+=======
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model ShoppingItem {
+  id        Int      @id @default(autoincrement())
+  name      String
+  quantity  Int      @default(1)
+  checked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model CalendarNote {
+  id        Int      @id @default(autoincrement())
+  date      DateTime
+  time      String   @default("00:00")
+  content   String
+  completed Boolean  @default(false)
+  createdAt DateTime @default(now())
+>>>>>>> b3238c8eeff0561bcaeb0f06f18f9ef03691da46
 }
