@@ -1,5 +1,6 @@
 'use client';
 
+<<<<<<< HEAD
 import { useState, useEffect } from 'react';
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -34,11 +35,24 @@ export default function Home() {
         <h1 className="text-3xl font-bold text-white">{session.user.name}'s OverLord</h1>
         <LogoutButton />
       </div>
+=======
+import { useState } from 'react';
+import Calendar from './components/Calendar';
+import ShoppingList from './components/ShoppingList';
+
+export default function Page() {
+  const [view, setView] = useState<string>('both'); // New state for managing the current view
+
+  return (
+    <div className="h-full flex flex-col">
+      <h1 className="text-3xl font-bold text-white mb-4">OverLord</h1>
+>>>>>>> b3238c8eeff0561bcaeb0f06f18f9ef03691da46
       <div className="flex space-x-2 mb-4">
         <button
           onClick={() => setView('both')}
           className={`px-4 py-2 rounded-full ${view === 'both' ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-700'} hover:bg-blue-700 transition-colors`}
         >
+<<<<<<< HEAD
           Vis begge
         </button>
         <button
@@ -46,11 +60,21 @@ export default function Home() {
           className={`px-4 py-2 rounded-full ${view === 'calendar' ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-700'} hover:bg-blue-700 transition-colors`}
         >
           Vis kalender
+=======
+          Begge
+        </button>
+        <button
+          onClick={() => setView('notes')}
+          className={`px-4 py-2 rounded-full ${view === 'notes' ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-700'} hover:bg-blue-700 transition-colors`}
+        >
+          Notater
+>>>>>>> b3238c8eeff0561bcaeb0f06f18f9ef03691da46
         </button>
         <button
           onClick={() => setView('shopping')}
           className={`px-4 py-2 rounded-full ${view === 'shopping' ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-700'} hover:bg-blue-700 transition-colors`}
         >
+<<<<<<< HEAD
           Vis handleliste
         </button>
       </div>
@@ -66,6 +90,19 @@ export default function Home() {
           </div>
         )}
       </div>
+=======
+          Handleliste
+        </button>
+      </div>
+      {view === 'both' && (
+        <>
+          <Calendar />
+          <ShoppingList />
+        </>
+      )}
+      {view === 'notes' && <Calendar />}
+      {view === 'shopping' && <ShoppingList />}
+>>>>>>> b3238c8eeff0561bcaeb0f06f18f9ef03691da46
     </div>
   );
 }

@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@prisma/client": "^5.19.1",
     "autoprefixer": "^10.4.20",
     "bcrypt": "^5.1.1",
@@ -22,6 +23,16 @@
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
+=======
+    "@prisma/client": "^5.19.0",
+    "autoprefixer": "^10.4.20",
+    "next": "^14.2.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+>>>>>>> b3238c8eeff0561bcaeb0f06f18f9ef03691da46
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

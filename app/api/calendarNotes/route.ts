@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { getServerSession } from "next-auth/next";
@@ -138,4 +139,53 @@ export async function DELETE(request: Request) {
     console.error('Error in DELETE:', error);
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+=======
+import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const startDate = searchParams.get('startDate');
+  const endDate = searchParams.get('endDate');
+
+  const whereClause = startDate && endDate ? {
+    date: {
+      gte: new Date(startDate),
+      lt: new Date(new Date(endDate).setDate(new Date(endDate).getDate() + 1)), // Include the end date
+    },
+  } : {};
+
+  const notes = await prisma.calendarNote.findMany({
+    where: whereClause,
+  });
+  return NextResponse.json(notes);
+}
+
+export async function POST(request: Request) {
+  const { date, time, content } = await request.json();
+  const newNote = await prisma.calendarNote.create({
+    data: { date: new Date(date), time, content },
+  });
+  return NextResponse.json(newNote);
+}
+
+export async function PATCH(request: Request) {
+  const { id, completed } = await request.json();
+  const updatedNote = await prisma.calendarNote.update({
+    where: { id },
+    data: { completed },
+  });
+  return NextResponse.json(updatedNote);
+}
+
+export async function PUT(request: Request) {
+  const { id, date, time, content } = await request.json();
+  const updatedNote = await prisma.calendarNote.update({
+    where: { id },
+    data: { date: new Date(date), time, content },
+  });
+  return NextResponse.json(updatedNote);
+>>>>>>> b3238c8eeff0561bcaeb0f06f18f9ef03691da46
 }
