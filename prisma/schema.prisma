@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  name          String?
+  email         String         @unique
+  password      String
+  shoppingItems ShoppingItem[]
+  calendarNotes CalendarNote[]
+}
+
+model ShoppingItem {
+  id        Int      @id @default(autoincrement())
+  name      String
+  quantity  Int      @default(1)
+  completed Boolean  @default(false)
+  createdAt DateTime @default(now())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model CalendarNote {
+  id        Int      @id @default(autoincrement())
+  date      DateTime
+  time      String   @default("00:00")
+  content   String
+  completed Boolean  @default(false)
+  createdAt DateTime @default(now())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+}
